@@ -68,7 +68,7 @@ $xlmSac = ($xlmSac | Select-Object -Last 1).ToString().Trim()
 stellar contract invoke --id $roles --source $identity --network testnet -- init --platform $addr | Out-Null
 stellar contract invoke --id $fee --source $identity --network testnet -- init --platform $addr --usdc $usdcSac --xlm_fee 50000000 --usdc_fee 10000000 | Out-Null
 stellar contract invoke --id $cnn --source $identity --network testnet -- init --platform $addr | Out-Null
-stellar contract invoke --id $cert --source $identity --network testnet -- init --platform $addr --validator $addr --fee_collector $fee | Out-Null
+stellar contract invoke --id $cert --source $identity --network testnet -- init --platform $addr --validator $addr --fee_collector $fee --connoisseur $cnn | Out-Null
 stellar contract invoke --id $nft --source $identity --network testnet -- init --admin $addr | Out-Null
 stellar contract invoke --id $part --source $identity --network testnet -- init --admin $addr | Out-Null
 stellar contract invoke --id $mkt --source $identity --network testnet -- init --admin $addr --participation $part | Out-Null

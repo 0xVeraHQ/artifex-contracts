@@ -29,6 +29,7 @@ pub enum DataKey {
     Platform,
     Validator,
     FeeCollector,
+    Connoisseur,
     Cert(BytesN<32>),
     Inited,
 }
@@ -38,7 +39,13 @@ pub struct Contract;
 
 #[contractimpl]
 impl Contract {
-    pub fn init(env: Env, platform: Address, validator: Address, fee_collector: Address) {
+    pub fn init(
+        env: Env,
+        platform: Address,
+        validator: Address,
+        fee_collector: Address,
+        connoisseur: Address,
+    ) {
         if env.storage().instance().has(&DataKey::Inited) {
             panic!("already initialized");
         }
@@ -48,6 +55,9 @@ impl Contract {
         env.storage()
             .instance()
             .set(&DataKey::FeeCollector, &fee_collector);
+        env.storage()
+            .instance()
+            .set(&DataKey::Connoisseur, &connoisseur);
         env.storage().instance().set(&DataKey::Inited, &true);
     }
 
@@ -178,6 +188,21 @@ impl Contract {
                 panic!("missing signature");
             }
         }
+        // Deceased-connoisseur path: at least one required signer must have authorized the piece.
+        if cert.cert_type == CERT_DECEASED_CONNOISSEUR {
+            let cnn_addr: Address = env.storage().instance().get(&DataKey::Connoisseur).unwrap();
+            let cnn = ConnoisseurClient::new(&env, &cnn_addr);
+            let mut auth_ok = false;
+            for req in cert.required.iter() {
+                if cnn.is_authorized(&req, &piece_id) {
+                    auth_ok = true;
+                    break;
+                }
+            }
+            if !auth_ok {
+                panic!("connoisseur not authorized");
+            }
+        }
         cert.finalized = true;
         env.storage()
             .persistent()
@@ -201,5 +226,16 @@ impl Contract {
             .unwrap_or(false)
     }
 }
+
+mod connoisseur_client {
+    use super::*;
+    use soroban_sdk::contractclient;
+
+    #[contractclient(name = "ConnoisseurClient")]
+    pub trait ConnoisseurTrait {
+        fn is_authorized(env: Env, connoisseur: Address, piece_id: BytesN<32>) -> bool;
+    }
+}
+use connoisseur_client::*;
 
 mod test;
