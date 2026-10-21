@@ -1,0 +1,27 @@
+﻿{
+    "network":  "testnet",
+    "version":  "v2",
+    "deployer":  "GBYYRWRRF4PNJJMZGE2Q5HUOCPSU3Y4WCTWJ3BQFFNUO3YIPOAD7A357",
+    "deployedAt":  "2026-10-21T19:56:23.4941810Z",
+    "keepsV1":  true,
+    "v1Source":  "deployments/testnet.json",
+    "usdcSac":  "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+    "xlmSac":  "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+    "contracts":  {
+                      "artifex_roles":  "CBMIHTVOH2ULKCEMW3EDYLMB2QP2MBEDPXKZERQGSBKYJOZAYBYP23KV",
+                      "artifex_fee_collector":  "CA5EA5DZHDTR26B67WGMW7BKCDZGW4YY6HNH37MR5CLUHO6ZRN26CCPB",
+                      "artifex_connoisseur":  "CB6NP3EO5DUPRKEOBZRQKCTRIUHK35DPWDODV2RYF24RWMG4Z2Q4G246",
+                      "artifex_cert_registry":  "CBTC2Y3PXQUVTHWDDBK27DI7LWV3HTGJ5LRYPSSXLL3U75SWRS7IHZZG",
+                      "artifex_whole_nft":  "CABDLZI442DZQJFOJIEOS6IMWW5FDSLPZC3HHPZWJT5RPL346I6WQIH3",
+                      "artifex_participation":  "CDFFRWEAMTPL4PADGS34TBVTDJYPLZRSKN5XSUK6YEQA3HQY7VJJRWPE",
+                      "artifex_marketplace":  "CBZFE5GO3L4ZUMBHZCRRZBNWX6JEY2QXI7CIP3QHFIJX5QHYDPS7ZHNU",
+                      "artifex_distribution":  "CAJFTME25FPLOQABRTVWGXAFRXFBAAWKC2UYWDQEWLDQ7D6D6S6R5VYL"
+                  },
+    "apiWiringNotes":  [
+                           "Copy contracts into artifex-api registry.json versions.v2 (keep v1 active until cutover).",
+                           "Wire POST /tx/cert/finalize-with-fee to finalize_with_fee(fee_asset, xlm_sac).",
+                           "Prefer finalize_with_fee over collect + mark_fee_paid + finalize.",
+                           "create_offer takes payment_tokens[] + unit_prices[]; buy_primary requires payment_token.",
+                           "Do not default paymentToken to USDC when XLM was selected."
+                       ]
+}

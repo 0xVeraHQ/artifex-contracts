@@ -1,4 +1,4 @@
-# Deploy Artifex registry **v2** to Testnet while keeping v1 IDs untouched.
+# Deploy Artifex registry v2 to Testnet while keeping v1 IDs untouched.
 # Redeploys: fee_collector, cert_registry, participation, marketplace, distribution
 # Reuses from deployments/testnet.json (v1): roles, connoisseur, whole_nft, SAC IDs
 #
@@ -10,11 +10,11 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 $v1Path = Join-Path $root "deployments\testnet.json"
-if (-not (Test-Path $v1Path)) { throw "missing $v1Path — need v1 deploy as baseline" }
+if (-not (Test-Path $v1Path)) { throw "missing $v1Path - need v1 deploy as baseline" }
 $v1 = Get-Content $v1Path -Raw | ConvertFrom-Json
 
 $identity = "artifex-deployer"
-$keys = stellar keys ls 2>$null
+$keys = @(stellar keys ls 2>$null)
 if ($env:STELLAR_DEPLOYER_SECRET) {
   $env:STELLAR_DEPLOYER_SECRET | stellar keys add $identity --secret-key 2>$null
 } elseif ($keys -notcontains $identity) {
@@ -86,14 +86,14 @@ $result = [ordered]@{
     artifex_distribution    = $dist
   }
   apiWiringNotes    = @(
-    "Copy contracts.* into artifex-api src/contracts/registry.json versions.v2 (keep v1 active until cutover).",
-    "Wire POST /tx/cert/finalize-with-fee -> finalize_with_fee(fee_asset, xlm_sac).",
-    "Prefer finalize_with_fee over collect_* + mark_fee_paid + finalize.",
-    "create_offer now takes payment_tokens[] + unit_prices[]; buy_primary requires payment_token among accepted.",
-    "Default paymentToken must NOT hardcode USDC when buyer/seller selected XLM."
+    "Copy contracts into artifex-api registry.json versions.v2 (keep v1 active until cutover)."
+    "Wire POST /tx/cert/finalize-with-fee to finalize_with_fee(fee_asset, xlm_sac)."
+    "Prefer finalize_with_fee over collect + mark_fee_paid + finalize."
+    "create_offer takes payment_tokens[] + unit_prices[]; buy_primary requires payment_token."
+    "Do not default paymentToken to USDC when XLM was selected."
   )
 }
 $jsonPath = Join-Path $outDir "testnet-v2.json"
 $result | ConvertTo-Json -Depth 6 | Set-Content -Path $jsonPath -Encoding utf8
 Write-Host "Wrote $jsonPath"
-Write-Host "v1 IDs unchanged in deployments/testnet.json — lead activates registry v2 in API when ready."
+Write-Host "v1 IDs unchanged in deployments/testnet.json - lead activates registry v2 in API when ready."
