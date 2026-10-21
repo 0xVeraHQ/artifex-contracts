@@ -2,21 +2,29 @@
 
 use super::*;
 use artifex_connoisseur::{Contract as Cnn, ContractClient as CnnClient};
-use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, Vec};
+use artifex_fee_collector::{Contract as Fee, ContractClient as FeeClient};
+use soroban_sdk::{
+    testutils::Address as _,
+    token::StellarAssetClient,
+    Address, BytesN, Env, Vec,
+};
 
 fn setup_env() -> (Env, Address, Address, Address, Address, Address) {
     let env = Env::default();
     env.mock_all_auths();
     let platform = Address::generate(&env);
     let validator = Address::generate(&env);
-    let fee_c = Address::generate(&env);
+    let usdc = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    let fee_id = env.register(Fee, ());
+    FeeClient::new(&env, &fee_id).init(&platform, &usdc, &50_000_000, &10_000_000);
     let cnn_id = env.register(Cnn, ());
     let cnn = CnnClient::new(&env, &cnn_id);
     cnn.init(&platform);
     let id = env.register(Contract, ());
     let client = ContractClient::new(&env, &id);
-    client.init(&platform, &validator, &fee_c, &cnn_id);
-    (env, id, cnn_id, platform, validator, fee_c)
+    client.init(&platform, &validator, &fee_id, &cnn_id);
+    FeeClient::new(&env, &fee_id).set_cert_registry(&platform, &id);
+    (env, id, cnn_id, platform, validator, fee_id)
 }
 
 #[test]
@@ -36,6 +44,143 @@ fn living_author_flow() {
     let c = client.get_cert(&piece);
     assert_eq!(c.cert_type, CERT_LIVING_AUTHOR);
     assert_eq!(c.signed.len(), 1);
+}
+
+#[test]
+fn living_author_finalize_with_fee_atomic() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let platform = Address::generate(&env);
+    let validator = Address::generate(&env);
+    let artist = Address::generate(&env);
+    let usdc = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    let xlm = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    StellarAssetClient::new(&env, &xlm).mint(&artist, &100_000_000);
+
+    let fee_id = env.register(Fee, ());
+    let fee = FeeClient::new(&env, &fee_id);
+    fee.init(&platform, &usdc, &50_000_000, &10_000_000);
+
+    let cnn_id = env.register(Cnn, ());
+    CnnClient::new(&env, &cnn_id).init(&platform);
+
+    let cert_id = env.register(Contract, ());
+    let client = ContractClient::new(&env, &cert_id);
+    client.init(&platform, &validator, &fee_id, &cnn_id);
+    fee.set_cert_registry(&platform, &cert_id);
+
+    let piece = BytesN::from_array(&env, &[30u8; 32]);
+    let claim = BytesN::from_array(&env, &[31u8; 32]);
+    let mut required = Vec::new(&env);
+    required.push_back(artist.clone());
+    client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
+    client.cosign(&artist, &piece);
+    client.finalize_with_fee(&artist, &piece, &FEE_ASSET_XLM, &xlm);
+    assert!(client.is_finalized(&piece));
+    assert!(client.get_cert(&piece).fee_paid);
+    let (xbal, _) = fee.balances();
+    assert_eq!(xbal, 50_000_000);
+}
+
+#[test]
+fn deposit_refund_when_not_finalized() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let platform = Address::generate(&env);
+    let validator = Address::generate(&env);
+    let artist = Address::generate(&env);
+    let usdc = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    let xlm = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    StellarAssetClient::new(&env, &xlm).mint(&artist, &100_000_000);
+
+    let fee_id = env.register(Fee, ());
+    let fee = FeeClient::new(&env, &fee_id);
+    fee.init(&platform, &usdc, &50_000_000, &10_000_000);
+
+    let cnn_id = env.register(Cnn, ());
+    CnnClient::new(&env, &cnn_id).init(&platform);
+
+    let cert_id = env.register(Contract, ());
+    let client = ContractClient::new(&env, &cert_id);
+    client.init(&platform, &validator, &fee_id, &cnn_id);
+    fee.set_cert_registry(&platform, &cert_id);
+
+    let piece = BytesN::from_array(&env, &[32u8; 32]);
+    let claim = BytesN::from_array(&env, &[33u8; 32]);
+    let mut required = Vec::new(&env);
+    required.push_back(artist.clone());
+    client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
+    fee.deposit_xlm(&artist, &xlm, &piece);
+    assert!(fee.has_deposit(&piece));
+    fee.refund(&artist, &piece);
+    assert!(!fee.has_deposit(&piece));
+    assert!(!client.is_finalized(&piece));
+}
+
+#[test]
+fn finalize_consumes_piece_deposit() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let platform = Address::generate(&env);
+    let validator = Address::generate(&env);
+    let artist = Address::generate(&env);
+    let usdc = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    let xlm = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    StellarAssetClient::new(&env, &xlm).mint(&artist, &100_000_000);
+
+    let fee_id = env.register(Fee, ());
+    let fee = FeeClient::new(&env, &fee_id);
+    fee.init(&platform, &usdc, &50_000_000, &10_000_000);
+
+    let cnn_id = env.register(Cnn, ());
+    CnnClient::new(&env, &cnn_id).init(&platform);
+
+    let cert_id = env.register(Contract, ());
+    let client = ContractClient::new(&env, &cert_id);
+    client.init(&platform, &validator, &fee_id, &cnn_id);
+    fee.set_cert_registry(&platform, &cert_id);
+
+    let piece = BytesN::from_array(&env, &[34u8; 32]);
+    let claim = BytesN::from_array(&env, &[35u8; 32]);
+    let mut required = Vec::new(&env);
+    required.push_back(artist.clone());
+    client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
+    client.cosign(&artist, &piece);
+    fee.deposit_xlm(&artist, &xlm, &piece);
+    client.finalize_cert(&artist, &piece);
+    assert!(client.is_finalized(&piece));
+    assert!(!fee.has_deposit(&piece));
+}
+
+#[test]
+#[should_panic(expected = "missing signature")]
+fn finalize_with_fee_reverts_before_charge_if_unsigned() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let platform = Address::generate(&env);
+    let validator = Address::generate(&env);
+    let artist = Address::generate(&env);
+    let usdc = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    let xlm = env.register_stellar_asset_contract_v2(platform.clone()).address();
+    StellarAssetClient::new(&env, &xlm).mint(&artist, &100_000_000);
+
+    let fee_id = env.register(Fee, ());
+    let fee = FeeClient::new(&env, &fee_id);
+    fee.init(&platform, &usdc, &50_000_000, &10_000_000);
+
+    let cnn_id = env.register(Cnn, ());
+    CnnClient::new(&env, &cnn_id).init(&platform);
+
+    let cert_id = env.register(Contract, ());
+    let client = ContractClient::new(&env, &cert_id);
+    client.init(&platform, &validator, &fee_id, &cnn_id);
+
+    let piece = BytesN::from_array(&env, &[36u8; 32]);
+    let claim = BytesN::from_array(&env, &[37u8; 32]);
+    let mut required = Vec::new(&env);
+    required.push_back(artist.clone());
+    client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
+    client.finalize_with_fee(&artist, &piece, &FEE_ASSET_XLM, &xlm);
 }
 
 #[test]
@@ -89,7 +234,6 @@ fn dead_author_single_sig_propose_fails() {
     let claim = BytesN::from_array(&env, &[6u8; 32]);
     let mut required = Vec::new(&env);
     required.push_back(cnn);
-    // Deceased types require 2 signers — single signer must fail.
     client.propose_cert(
         &Address::generate(&env),
         &piece,
@@ -120,7 +264,6 @@ fn dead_author_finalize_with_one_of_two_fails() {
         &required,
     );
     client.cosign(&connoisseur, &piece);
-    // validator never signs
     client.mark_fee_paid(&platform, &piece);
     client.finalize_cert(&connoisseur, &piece);
 }
@@ -133,7 +276,6 @@ fn connoisseur_without_auth_cannot_finalize() {
     let connoisseur = Address::generate(&env);
     let piece = BytesN::from_array(&env, &[15u8; 32]);
     let claim = BytesN::from_array(&env, &[16u8; 32]);
-    // No cnn.authorize call
     let mut required = Vec::new(&env);
     required.push_back(connoisseur.clone());
     required.push_back(validator.clone());

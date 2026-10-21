@@ -182,22 +182,23 @@ checksum = "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56"
 
 [[package]]
 name = "artifex_cert_registry"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "artifex_connoisseur",
+ "artifex_fee_collector",
  "soroban-sdk",
 ]
 
 [[package]]
 name = "artifex_connoisseur"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "soroban-sdk",
 ]
 
 [[package]]
 name = "artifex_distribution"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "artifex_participation",
  "soroban-sdk",
@@ -205,14 +206,14 @@ dependencies = [
 
 [[package]]
 name = "artifex_fee_collector"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "soroban-sdk",
 ]
 
 [[package]]
 name = "artifex_marketplace"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "artifex_participation",
  "soroban-sdk",
@@ -220,21 +221,21 @@ dependencies = [
 
 [[package]]
 name = "artifex_participation"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "soroban-sdk",
 ]
 
 [[package]]
 name = "artifex_roles"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "soroban-sdk",
 ]
 
 [[package]]
 name = "artifex_whole_nft"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "soroban-sdk",
 ]

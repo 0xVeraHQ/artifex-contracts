@@ -5,8 +5,16 @@ use artifex_participation::{Contract as Part, ContractClient as PartClient, TYPE
 use soroban_sdk::{
     testutils::Address as _,
     token::{StellarAssetClient, TokenClient},
-    Address, BytesN, Env,
+    Address, BytesN, Env, Vec,
 };
+
+fn tokens_prices(env: &Env, token: &Address, price: i128) -> (Vec<Address>, Vec<i128>) {
+    let mut tokens = Vec::new(env);
+    tokens.push_back(token.clone());
+    let mut prices = Vec::new(env);
+    prices.push_back(price);
+    (tokens, prices)
+}
 
 fn mkt_setup(
     env: &Env,
@@ -41,12 +49,13 @@ fn list_and_partial_buy() {
     let (_admin, seller, buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[8u8; 32]);
     let terms = BytesN::from_array(&env, &[9u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1_000_000);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
+        &tokens,
+        &prices,
         &50,
         &terms,
         &false,
@@ -69,12 +78,13 @@ fn buy_more_than_listing_available_fails() {
     let (_admin, seller, buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[1u8; 32]);
     let terms = BytesN::from_array(&env, &[2u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1_000_000);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
+        &tokens,
+        &prices,
         &50,
         &terms,
         &false,
@@ -92,12 +102,13 @@ fn buy_cancelled_listing_fails() {
     let (_admin, seller, buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[3u8; 32]);
     let terms = BytesN::from_array(&env, &[4u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1_000_000);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
+        &tokens,
+        &prices,
         &50,
         &terms,
         &false,
@@ -126,12 +137,13 @@ fn buy_wrong_asset_insufficient_fails() {
     mkt.init(&admin, &part_id);
     let piece = BytesN::from_array(&env, &[5u8; 32]);
     let terms = BytesN::from_array(&env, &[6u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1_000_000);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
+        &tokens,
+        &prices,
         &50,
         &terms,
         &false,
@@ -148,12 +160,13 @@ fn cancel_listing_returns_units() {
     let (_admin, seller, _buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[7u8; 32]);
     let terms = BytesN::from_array(&env, &[8u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1_000_000);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
+        &tokens,
+        &prices,
         &50,
         &terms,
         &false,

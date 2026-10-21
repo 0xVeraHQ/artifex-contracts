@@ -1,12 +1,22 @@
 #![cfg(test)]
 
 use super::*;
-use artifex_participation::{Contract as Part, ContractClient as PartClient, TYPE_ECONOMIC};
+use artifex_participation::{
+    Contract as Part, ContractClient as PartClient, TYPE_ECONOMIC, TYPE_PATRONAGE,
+};
 use soroban_sdk::{
     testutils::Address as _,
     token::{StellarAssetClient, TokenClient},
     Address, BytesN, Env, Vec,
 };
+
+fn tokens_prices(env: &Env, token: &Address, price: i128) -> (Vec<Address>, Vec<i128>) {
+    let mut tokens = Vec::new(env);
+    tokens.push_back(token.clone());
+    let mut prices = Vec::new(env);
+    prices.push_back(price);
+    (tokens, prices)
+}
 
 #[test]
 fn distribute_and_burn() {
@@ -25,12 +35,13 @@ fn distribute_and_burn() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[1u8; 32]);
     let terms = BytesN::from_array(&env, &[2u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1,
+        &tokens,
+        &prices,
         &100,
         &terms,
         &true,
@@ -73,12 +84,13 @@ fn distribution_bps_mismatch_fails() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[3u8; 32]);
     let terms = BytesN::from_array(&env, &[4u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1,
+        &tokens,
+        &prices,
         &100,
         &terms,
         &true,
@@ -113,12 +125,13 @@ fn distribution_len_mismatch_fails() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[5u8; 32]);
     let terms = BytesN::from_array(&env, &[6u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_ECONOMIC,
-        &usdc,
-        &1,
+        &tokens,
+        &prices,
         &100,
         &terms,
         &true,
@@ -169,12 +182,13 @@ fn burn_not_allowed_for_patronage() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[8u8; 32]);
     let terms = BytesN::from_array(&env, &[9u8; 32]);
+    let (tokens, prices) = tokens_prices(&env, &usdc, 1);
     let oid = part.create_offer(
         &seller,
         &piece,
         &TYPE_PATRONAGE,
-        &usdc,
-        &1,
+        &tokens,
+        &prices,
         &100,
         &terms,
         &true,

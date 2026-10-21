@@ -10,6 +10,10 @@ pub const CERT_DECEASED_INSTITUTION: u32 = 3;
 pub const CERT_DECEASED_HEIR: u32 = 4;
 pub const CERT_PRIOR_DIGITIZATION: u32 = 5;
 
+/// Fee asset for `finalize_with_fee`: 0 = XLM SAC, 1 = USDC.
+pub const FEE_ASSET_XLM: u32 = 0;
+pub const FEE_ASSET_USDC: u32 = 1;
+
 #[contracttype]
 #[derive(Clone)]
 pub struct Cert {
@@ -142,6 +146,7 @@ impl Contract {
     }
 
     /// Mark fee paid (API/fee_collector integration calls this after collect_* succeeds).
+    /// Prefer `finalize_with_fee` (atomic) or piece `deposit_*` + `finalize_cert` (refundable).
     pub fn mark_fee_paid(env: Env, caller: Address, piece_id: BytesN<32>) {
         caller.require_auth();
         let platform: Address = env.storage().instance().get(&DataKey::Platform).unwrap();
@@ -162,6 +167,7 @@ impl Contract {
             .publish((symbol_short!("fee_paid"), piece_id), true);
     }
 
+    /// Finalize when fee already marked or a piece-scoped deposit exists (then consume it).
     pub fn finalize_cert(env: Env, caller: Address, piece_id: BytesN<32>) {
         caller.require_auth();
         let mut cert: Cert = env
@@ -169,13 +175,72 @@ impl Contract {
             .persistent()
             .get(&DataKey::Cert(piece_id.clone()))
             .expect("no cert");
+        Self::assert_ready_to_finalize(&env, &cert, &piece_id);
+        if !cert.fee_paid {
+            let fee_addr: Address = env.storage().instance().get(&DataKey::FeeCollector).unwrap();
+            let fee = FeeCollectorClient::new(&env, &fee_addr);
+            if !fee.has_deposit(&piece_id) {
+                panic!("fee required");
+            }
+            // Registry consumes deposit; auth is the contract itself.
+            fee.consume(&env.current_contract_address(), &piece_id);
+            cert.fee_paid = true;
+        }
+        cert.finalized = true;
+        env.storage()
+            .persistent()
+            .set(&DataKey::Cert(piece_id.clone()), &cert);
+        env.events()
+            .publish((symbol_short!("cert_fin"), caller), piece_id);
+    }
+
+    /// Atomic path: validate → collect fee → finalize in one invocation.
+    /// If finalize would fail, the whole tx reverts and the fee is not charged.
+    /// `fee_asset`: 0 = XLM (`xlm` SAC address required), 1 = USDC (`xlm` ignored).
+    pub fn finalize_with_fee(
+        env: Env,
+        caller: Address,
+        piece_id: BytesN<32>,
+        fee_asset: u32,
+        xlm: Address,
+    ) {
+        caller.require_auth();
+        let mut cert: Cert = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Cert(piece_id.clone()))
+            .expect("no cert");
+        Self::assert_ready_to_finalize(&env, &cert, &piece_id);
+
+        if !cert.fee_paid {
+            let fee_addr: Address = env.storage().instance().get(&DataKey::FeeCollector).unwrap();
+            let fee = FeeCollectorClient::new(&env, &fee_addr);
+            // Prefer consuming an existing piece deposit; else collect in this same tx.
+            if fee.has_deposit(&piece_id) {
+                fee.consume(&env.current_contract_address(), &piece_id);
+            } else if fee_asset == FEE_ASSET_USDC {
+                fee.collect_usdc(&caller);
+            } else if fee_asset == FEE_ASSET_XLM {
+                fee.collect_xlm(&caller, &xlm);
+            } else {
+                panic!("bad fee_asset");
+            }
+            cert.fee_paid = true;
+        }
+
+        cert.finalized = true;
+        env.storage()
+            .persistent()
+            .set(&DataKey::Cert(piece_id.clone()), &cert);
+        env.events()
+            .publish((symbol_short!("cert_fin"), caller), piece_id);
+    }
+
+    fn assert_ready_to_finalize(env: &Env, cert: &Cert, piece_id: &BytesN<32>) {
         if cert.finalized {
             panic!("already finalized");
         }
-        if !cert.fee_paid {
-            panic!("fee required");
-        }
-        // All required signers present (validator may substitute for prior-digitization).
+        // All required signers must have cosigned (validator may appear in `required`).
         for req in cert.required.iter() {
             let mut ok = false;
             for s in cert.signed.iter() {
@@ -191,10 +256,10 @@ impl Contract {
         // Deceased-connoisseur path: at least one required signer must have authorized the piece.
         if cert.cert_type == CERT_DECEASED_CONNOISSEUR {
             let cnn_addr: Address = env.storage().instance().get(&DataKey::Connoisseur).unwrap();
-            let cnn = ConnoisseurClient::new(&env, &cnn_addr);
+            let cnn = ConnoisseurClient::new(env, &cnn_addr);
             let mut auth_ok = false;
             for req in cert.required.iter() {
-                if cnn.is_authorized(&req, &piece_id) {
+                if cnn.is_authorized(&req, piece_id) {
                     auth_ok = true;
                     break;
                 }
@@ -203,12 +268,6 @@ impl Contract {
                 panic!("connoisseur not authorized");
             }
         }
-        cert.finalized = true;
-        env.storage()
-            .persistent()
-            .set(&DataKey::Cert(piece_id.clone()), &cert);
-        env.events()
-            .publish((symbol_short!("cert_fin"), caller), piece_id);
     }
 
     pub fn get_cert(env: Env, piece_id: BytesN<32>) -> Cert {
@@ -237,5 +296,19 @@ mod connoisseur_client {
     }
 }
 use connoisseur_client::*;
+
+mod fee_collector_client {
+    use super::*;
+    use soroban_sdk::contractclient;
+
+    #[contractclient(name = "FeeCollectorClient")]
+    pub trait FeeCollectorTrait {
+        fn collect_xlm(env: Env, payer: Address, xlm: Address);
+        fn collect_usdc(env: Env, payer: Address);
+        fn has_deposit(env: Env, piece_id: BytesN<32>) -> bool;
+        fn consume(env: Env, caller: Address, piece_id: BytesN<32>);
+    }
+}
+use fee_collector_client::*;
 
 mod test;
