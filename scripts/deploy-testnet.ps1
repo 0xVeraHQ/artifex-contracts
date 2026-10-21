@@ -94,19 +94,19 @@ $result = [ordered]@{
 $jsonPath = Join-Path $outDir "testnet.json"
 $result | ConvertTo-Json -Depth 5 | Set-Content -Path $jsonPath -Encoding utf8
 Write-Host "Wrote $jsonPath"
-# Also emit API env snippet (names + values of public IDs only)
+
+# API loads contract IDs from its registry; do not duplicate IDs into env.
+# testnet.json is the source of truth for this deploy. Pointer only:
 $envSnippet = @"
-SOROBAN_NETWORK=testnet
-SOROBAN_ROLES_CONTRACT_ID=$roles
-SOROBAN_FEE_COLLECTOR_CONTRACT_ID=$fee
-SOROBAN_CONNOISSEUR_CONTRACT_ID=$cnn
-SOROBAN_CERT_REGISTRY_CONTRACT_ID=$cert
-SOROBAN_WHOLE_NFT_CONTRACT_ID=$nft
-SOROBAN_PARTICIPATION_CONTRACT_ID=$part
-SOROBAN_MARKETPLACE_CONTRACT_ID=$mkt
-SOROBAN_DISTRIBUTION_CONTRACT_ID=$dist
-SOROBAN_USDC_SAC_ID=$usdcSac
-SOROBAN_XLM_SAC_ID=$xlmSac
+# Contract IDs: see deployments/testnet.json (source of truth).
+# Runtime registry lives in artifex-api — copy IDs there after deploy; do not commit secrets.
+STELLAR_NETWORK=testnet
 "@
 Set-Content -Path (Join-Path $outDir "testnet.api.env") -Value $envSnippet -Encoding utf8
-Write-Host "Wrote deployments/testnet.api.env (public contract IDs only)"
+Write-Host "Wrote deployments/testnet.api.env (STELLAR_NETWORK + pointer to testnet.json)"
+
+Write-Host ""
+Write-Host "=== After deploy ==="
+Write-Host "1. Commit/update deployments/testnet.json (public IDs only)."
+Write-Host "2. Register IDs in artifex-api (registry is source of truth at runtime)."
+Write-Host "3. Tag main with SemVer vX.Y.Z (e.g. v0.1.0). contracts release.yml validates the tag — no Harbor image."

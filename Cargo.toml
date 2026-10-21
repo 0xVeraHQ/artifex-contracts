@@ -4,6 +4,10 @@ members = [
   "contracts/*",
 ]
 
+[workspace.package]
+# Keep in sync with VERSION / git tag v0.1.0 (release.yml validates; no Harbor image)
+version = "0.1.0"
+
 [workspace.dependencies]
 soroban-sdk = "28"
 

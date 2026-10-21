@@ -34,4 +34,6 @@ stellar contract build
 
 Contract IDs written to `deployments/testnet.json` (gitignored secrets; IDs are public).
 
-**Plan B:** production Classic tags `0.14.1` / `0.2.1` are untouched.
+**Version:** see `VERSION` (`0.1.0`). After deploy, tag `main` with `vX.Y.Z` — release.yml validates; no Harbor image.
+
+Contract IDs: `deployments/testnet.json`. API registry is runtime source of truth (`testnet.api.env` only sets `STELLAR_NETWORK`).
