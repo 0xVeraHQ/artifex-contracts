@@ -96,3 +96,24 @@ fn collect_usdc_insufficient_balance() {
     client.init(&platform, &usdc, &50_000_000, &10_000_000);
     client.collect_usdc(&payer);
 }
+
+#[test]
+fn deposit_and_refund_xlm() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let platform = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let usdc = setup_token(&env, &platform);
+    let xlm = setup_token(&env, &platform);
+    StellarAssetClient::new(&env, &xlm).mint(&payer, &100_000_000);
+    let id = env.register(Contract, ());
+    let client = ContractClient::new(&env, &id);
+    client.init(&platform, &usdc, &50_000_000, &10_000_000);
+    let piece = soroban_sdk::BytesN::from_array(&env, &[42u8; 32]);
+    client.deposit_xlm(&payer, &xlm, &piece);
+    assert!(client.has_deposit(&piece));
+    assert_eq!(TokenClient::new(&env, &xlm).balance(&payer), 50_000_000);
+    client.refund(&payer, &piece);
+    assert!(!client.has_deposit(&piece));
+    assert_eq!(TokenClient::new(&env, &xlm).balance(&payer), 100_000_000);
+}
