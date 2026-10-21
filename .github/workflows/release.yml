@@ -1,0 +1,53 @@
+name: release
+
+# Contracts release rule: SemVer tag on main only. No Docker image.
+#   vX.Y.Z or vX.Y.Z-rc.N — validates tag + runs cargo test.
+# Deploy workflows may create these tags after Testnet deploy; never hackathon/soroban/classic names.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert tag is SemVer and commit is on main
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+            echo "Refusing tag '${TAG}': only vX.Y.Z or vX.Y.Z-rc.N allowed" >&2
+            exit 1
+          fi
+          case "${TAG}" in
+            *soroban*|*hackathon*|*classic*)
+              echo "Refusing tag '${TAG}': forbidden name fragment" >&2
+              exit 1
+              ;;
+          esac
+          git fetch origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "Tagged commit ${GITHUB_SHA} is not an ancestor of origin/main" >&2
+            exit 1
+          fi
+          echo "OK: contracts release ${TAG} @ ${GITHUB_SHA} (no image)"
+
+      - name: Install Rust (stable) + wasm target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cargo test (all crates)
+        run: |
+          set -euo pipefail
+          cargo test --workspace
