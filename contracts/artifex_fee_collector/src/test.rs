@@ -96,3 +96,37 @@ fn collect_usdc_insufficient_balance() {
     client.init(&platform, &usdc, &50_000_000, &10_000_000);
     client.collect_usdc(&payer);
 }
+
+#[test]
+fn deposit_xlm_refund_and_consume() {
+    use soroban_sdk::BytesN;
+    let env = Env::default();
+    env.mock_all_auths();
+    let platform = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let consumer = Address::generate(&env);
+    let usdc = setup_token(&env, &platform);
+    let xlm = setup_token(&env, &platform);
+    StellarAssetClient::new(&env, &xlm).mint(&payer, &200_000_000);
+    let id = env.register(Contract, ());
+    let client = ContractClient::new(&env, &id);
+    client.init(&platform, &usdc, &50_000_000, &10_000_000);
+    client.set_consumer(&platform, &consumer);
+
+    let piece_a = BytesN::from_array(&env, &[1u8; 32]);
+    let piece_b = BytesN::from_array(&env, &[2u8; 32]);
+    client.deposit_xlm(&payer, &xlm, &piece_a);
+    client.deposit_xlm(&payer, &xlm, &piece_b);
+    assert!(client.has_deposit(&piece_a));
+    assert_eq!(TokenClient::new(&env, &xlm).balance(&payer), 100_000_000);
+
+    client.refund_deposit(&payer, &piece_a, &xlm);
+    assert!(!client.has_deposit(&piece_a));
+    assert_eq!(TokenClient::new(&env, &xlm).balance(&payer), 150_000_000);
+
+    client.consume_deposit(&piece_b);
+    assert!(!client.has_deposit(&piece_b));
+    // consumed funds stay in collector balances
+    let (x, _) = client.balances();
+    assert_eq!(x, 50_000_000);
+}
