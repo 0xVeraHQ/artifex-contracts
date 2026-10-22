@@ -3,11 +3,17 @@ use soroban_sdk::{
     contract, contractimpl, contracttype, symbol_short, token, Address, BytesN, Env,
 };
 
-/// Participation types (4).
-pub const TYPE_ECONOMIC: u32 = 1;
-pub const TYPE_PATRONAGE: u32 = 2;
-pub const TYPE_EXHIBITION: u32 = 3;
-pub const TYPE_FRACTIONAL_CUSTODY: u32 = 4;
+/// Participation types (4) — product keys: future_sale / guaranteed_buyback /
+/// return_financing / exploitation_rights. On-chain values are stable u32 codes.
+pub const TYPE_FUTURE_SALE: u32 = 1;
+pub const TYPE_GUARANTEED_BUYBACK: u32 = 2;
+pub const TYPE_RETURN_FINANCING: u32 = 3;
+pub const TYPE_EXPLOITATION_RIGHTS: u32 = 4;
+/// Legacy aliases (same u32) — prefer TYPE_FUTURE_SALE etc.
+pub const TYPE_ECONOMIC: u32 = TYPE_FUTURE_SALE;
+pub const TYPE_PATRONAGE: u32 = TYPE_GUARANTEED_BUYBACK;
+pub const TYPE_EXHIBITION: u32 = TYPE_RETURN_FINANCING;
+pub const TYPE_FRACTIONAL_CUSTODY: u32 = TYPE_EXPLOITATION_RIGHTS;
 
 #[contracttype]
 #[derive(Clone)]
@@ -62,7 +68,9 @@ impl Contract {
         certified: bool,
     ) -> u64 {
         seller.require_auth();
-        if participation_type < TYPE_ECONOMIC || participation_type > TYPE_FRACTIONAL_CUSTODY {
+        if participation_type < TYPE_FUTURE_SALE
+            || participation_type > TYPE_EXPLOITATION_RIGHTS
+        {
             panic!("bad type");
         }
         if unit_price <= 0 || total_units <= 0 {
