@@ -3,10 +3,14 @@ use soroban_sdk::{
     contract, contractimpl, contracttype, symbol_short, token, Address, BytesN, Env, Vec,
 };
 
-pub const TYPE_ECONOMIC: u32 = 1;
-pub const TYPE_PATRONAGE: u32 = 2;
-pub const TYPE_EXHIBITION: u32 = 3;
-pub const TYPE_FRACTIONAL_CUSTODY: u32 = 4;
+pub const TYPE_FUTURE_SALE: u32 = 1;
+pub const TYPE_GUARANTEED_BUYBACK: u32 = 2;
+pub const TYPE_RETURN_FINANCING: u32 = 3;
+pub const TYPE_EXPLOITATION_RIGHTS: u32 = 4;
+pub const TYPE_ECONOMIC: u32 = TYPE_FUTURE_SALE;
+pub const TYPE_PATRONAGE: u32 = TYPE_GUARANTEED_BUYBACK;
+pub const TYPE_EXHIBITION: u32 = TYPE_RETURN_FINANCING;
+pub const TYPE_FRACTIONAL_CUSTODY: u32 = TYPE_EXPLOITATION_RIGHTS;
 
 #[contracttype]
 #[derive(Clone)]
@@ -68,7 +72,7 @@ impl Contract {
     }
 
     /// Distribute `amount` of payment_token from `payer` across `recipients`/`shares` (basis points sum 10000).
-    /// Type-specific rule (demo): patronage skips burn eligibility; economic allows later burn.
+    /// Type-specific rule (demo): guaranteed_buyback skips burn; future_sale allows later burn.
     pub fn distribute(
         env: Env,
         payer: Address,
@@ -112,7 +116,7 @@ impl Contract {
         );
     }
 
-    /// Burn participation units held by `holder` (economic / fractional_custody only in demo).
+    /// Burn participation units held by `holder` (future_sale / exploitation_rights only in demo).
     pub fn burn_units(env: Env, holder: Address, offer_id: u64, units: i128) {
         holder.require_auth();
         if units <= 0 {
@@ -123,8 +127,8 @@ impl Contract {
             .persistent()
             .get(&DataKey::Plan(offer_id))
             .expect("no plan");
-        if plan.participation_type != TYPE_ECONOMIC
-            && plan.participation_type != TYPE_FRACTIONAL_CUSTODY
+        if plan.participation_type != TYPE_FUTURE_SALE
+            && plan.participation_type != TYPE_EXPLOITATION_RIGHTS
         {
             panic!("burn not allowed for type");
         }
