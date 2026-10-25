@@ -1,0 +1,390 @@
+{
+  "meta": {
+    "rpcUrl": "https://mainnet.sorobanrpc.com",
+    "sourceAccount": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+    "networkPassphrase": "Public Global Stellar Network ; September 2015",
+    "timestamp": "2026-10-25T15:35:39.960Z",
+    "health": {
+      "status": "healthy",
+      "latestLedger": 65131350,
+      "latestLedgerCloseTime": "1792942533",
+      "oldestLedger": 65010391,
+      "oldestLedgerCloseTime": "1792337737",
+      "ledgerRetentionWindow": 120960
+    },
+    "feeField": "minResourceFee (stroops) from rpc.Server.simulateTransaction; reported XLM = (minResourceFee + inclusion 100 stroops) / 1e7. Nothing submitted/broadcast.",
+    "wasmDir": "D:/Git/orgs/0xVeraHQ/projects/artifex/artifex-contracts/target/wasm32v1-none/release"
+  },
+  "rows": [
+    {
+      "operation": "upload",
+      "contract": "artifex_roles",
+      "wasmBytes": 2090,
+      "wasmHash": "44c23d6eb67f685bfc9b7720654cd4a88ac4c8c83af963ae857828bf6e03c8d5",
+      "ok": true,
+      "minResourceFee": "45107259",
+      "feeXlm": "4.5107359",
+      "latestLedger": 65131350
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_fee_collector",
+      "wasmBytes": 7161,
+      "wasmHash": "c8fabb259b50cfe8cd04de5c3a5e7edd514a9c0f2e6fe6f10dfdc6d493aafdcb",
+      "ok": true,
+      "minResourceFee": "118999293",
+      "feeXlm": "11.8999393",
+      "latestLedger": 65131350
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_connoisseur",
+      "wasmBytes": 2233,
+      "wasmHash": "d7bfc6a7d34f4e8d69e35fdf042f57c495f1123e680906c0a0c33748bbd39284",
+      "ok": true,
+      "minResourceFee": "46615448",
+      "feeXlm": "4.6615548",
+      "latestLedger": 65131350
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_cert_registry",
+      "wasmBytes": 7303,
+      "wasmHash": "a14f3775b779b78b20fbe699ac18286c57038463f7c9957b07f18e70c55e78f6",
+      "ok": true,
+      "minResourceFee": "120596946",
+      "feeXlm": "12.0597046",
+      "latestLedger": 65131351
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_whole_nft",
+      "wasmBytes": 9172,
+      "wasmHash": "a5686ffba7bcc43b133ad404dd637ec9e03b2b728aefb45914faf4be4c09a52e",
+      "ok": true,
+      "minResourceFee": "152078832",
+      "feeXlm": "15.2078932",
+      "latestLedger": 65131351
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_participation",
+      "wasmBytes": 8684,
+      "wasmHash": "ff2570fa93bb434918bdc4c7f0567554407256f515c4678494a846eac0d33756",
+      "ok": true,
+      "minResourceFee": "143082414",
+      "feeXlm": "14.3082514",
+      "latestLedger": 65131351
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_marketplace",
+      "wasmBytes": 9832,
+      "wasmHash": "527581a683d10738514dbc35f9661971d68b69885f0be325318b09a6a36eb41b",
+      "ok": true,
+      "minResourceFee": "151505223",
+      "feeXlm": "15.1505323",
+      "latestLedger": 65131351
+    },
+    {
+      "operation": "upload",
+      "contract": "artifex_distribution",
+      "wasmBytes": 5645,
+      "wasmHash": "1034147e7d9db85076f108e24111024196018738bbad5389df8aa44c7a799f8b",
+      "ok": true,
+      "minResourceFee": "101867936",
+      "feeXlm": "10.1868036",
+      "latestLedger": 65131351
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_roles",
+      "wasmHash": "44c23d6eb67f685bfc9b7720654cd4a88ac4c8c83af963ae857828bf6e03c8d5",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(44c23d6eb67f685bfc9b7720654cd4a88ac4c8c83af963ae857828bf6e03c8d5)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_fee_collector",
+      "wasmHash": "c8fabb259b50cfe8cd04de5c3a5e7edd514a9c0f2e6fe6f10dfdc6d493aafdcb",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(c8fabb259b50cfe8cd04de5c3a5e7edd514a9c0f2e6fe6f10dfdc6d493aafdcb)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_connoisseur",
+      "wasmHash": "d7bfc6a7d34f4e8d69e35fdf042f57c495f1123e680906c0a0c33748bbd39284",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(d7bfc6a7d34f4e8d69e35fdf042f57c495f1123e680906c0a0c33748bbd39284)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_cert_registry",
+      "wasmHash": "a14f3775b779b78b20fbe699ac18286c57038463f7c9957b07f18e70c55e78f6",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(a14f3775b779b78b20fbe699ac18286c57038463f7c9957b07f18e70c55e78f6)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_whole_nft",
+      "wasmHash": "a5686ffba7bcc43b133ad404dd637ec9e03b2b728aefb45914faf4be4c09a52e",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(a5686ffba7bcc43b133ad404dd637ec9e03b2b728aefb45914faf4be4c09a52e)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_participation",
+      "wasmHash": "ff2570fa93bb434918bdc4c7f0567554407256f515c4678494a846eac0d33756",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(ff2570fa93bb434918bdc4c7f0567554407256f515c4678494a846eac0d33756)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_marketplace",
+      "wasmHash": "527581a683d10738514dbc35f9661971d68b69885f0be325318b09a6a36eb41b",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(527581a683d10738514dbc35f9661971d68b69885f0be325318b09a6a36eb41b)]\n"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_distribution",
+      "wasmHash": "1034147e7d9db85076f108e24111024196018738bbad5389df8aa44c7a799f8b",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:[\"Wasm does not exist\", Bytes(1034147e7d9db85076f108e24111024196018738bbad5389df8aa44c7a799f8b)]\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_roles",
+      "contractId": "CCHNAFRNGGZ3FX4CP2FKJ3ZIIPY3LEP6SGJGIWPPT26RX3KDT3W7CR5J",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CCHNAFRNGGZ3FX4CP2FKJ3ZIIPY3LEP6SGJGIWPPT26RX3KDT3W7CR5J, init], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_fee_collector",
+      "contractId": "CBTWTNDBKOEALPGT7RADQTQPLBW64RVH33SFWT7ZXON62EPJOQEUTMC5",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CBTWTNDBKOEALPGT7RADQTQPLBW64RVH33SFWT7ZXON62EPJOQEUTMC5, init], data:[GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN, CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75, 5000000, 1000000]\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_connoisseur",
+      "contractId": "CCKQRNX2FRHAAHVHTEJN2IZ4GRAOYHXMPTZ7KPHVUYJDTXVJVRAI77EP",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CCKQRNX2FRHAAHVHTEJN2IZ4GRAOYHXMPTZ7KPHVUYJDTXVJVRAI77EP, init], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_cert_registry",
+      "contractId": "CCEEZ6NXAYO7QA4RXYHMGEGT4XC6GESI63PPSPZRG6DMKFBIXRTX47NP",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CCEEZ6NXAYO7QA4RXYHMGEGT4XC6GESI63PPSPZRG6DMKFBIXRTX47NP, init], data:[GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN, GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN, GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN, GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN]\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_whole_nft",
+      "contractId": "CA3ZQSJTIHROJCAEL7HOXJLE5ACBJ7CS4NZTOPRHKTHG6PBJPT6CU54Z",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CA3ZQSJTIHROJCAEL7HOXJLE5ACBJ7CS4NZTOPRHKTHG6PBJPT6CU54Z, init], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_participation",
+      "contractId": "CDKMTIFLVVQ7FRPVGX4KKF6VCBZX2RTV374DQ5MATTONI6YTBD25KRTO",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CDKMTIFLVVQ7FRPVGX4KKF6VCBZX2RTV374DQ5MATTONI6YTBD25KRTO, init], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_marketplace",
+      "contractId": "CD3UM5HXBXPPR4PXUQD25Z4YPJW4H6MTKYBBCLKJDWCAC6HWBBOAKRTQ",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CD3UM5HXBXPPR4PXUQD25Z4YPJW4H6MTKYBBCLKJDWCAC6HWBBOAKRTQ, init], data:[GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN, GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN]\n"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_distribution",
+      "contractId": "CBGTYWZ2BZEJ7WMTIT77UUKXM2MYWZ5RYX4OKWAV47TT6FZVT4POHZFM",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CBGTYWZ2BZEJ7WMTIT77UUKXM2MYWZ5RYX4OKWAV47TT6FZVT4POHZFM, init], data:[GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN, GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN]\n"
+    },
+    {
+      "operation": "propose_cert",
+      "contract": "artifex_cert_registry",
+      "fn": "propose_cert",
+      "contractId": "CCEEZ6NXAYO7QA4RXYHMGEGT4XC6GESI63PPSPZRG6DMKFBIXRTX47NP",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CCEEZ6NXAYO7QA4RXYHMGEGT4XC6GESI63PPSPZRG6DMKFBIXRTX47NP, propose_cert], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "create_offer",
+      "contract": "artifex_participation",
+      "fn": "create_offer",
+      "contractId": "CDKMTIFLVVQ7FRPVGX4KKF6VCBZX2RTV374DQ5MATTONI6YTBD25KRTO",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CDKMTIFLVVQ7FRPVGX4KKF6VCBZX2RTV374DQ5MATTONI6YTBD25KRTO, create_offer], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "buy_primary",
+      "contract": "artifex_participation",
+      "fn": "buy_primary",
+      "contractId": "CDKMTIFLVVQ7FRPVGX4KKF6VCBZX2RTV374DQ5MATTONI6YTBD25KRTO",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CDKMTIFLVVQ7FRPVGX4KKF6VCBZX2RTV374DQ5MATTONI6YTBD25KRTO, buy_primary], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "list_secondary",
+      "contract": "artifex_marketplace",
+      "fn": "list",
+      "contractId": "CD3UM5HXBXPPR4PXUQD25Z4YPJW4H6MTKYBBCLKJDWCAC6HWBBOAKRTQ",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CD3UM5HXBXPPR4PXUQD25Z4YPJW4H6MTKYBBCLKJDWCAC6HWBBOAKRTQ, list], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "list_whole",
+      "contract": "artifex_whole_nft",
+      "fn": "list_for_sale",
+      "contractId": "CA3ZQSJTIHROJCAEL7HOXJLE5ACBJ7CS4NZTOPRHKTHG6PBJPT6CU54Z",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CA3ZQSJTIHROJCAEL7HOXJLE5ACBJ7CS4NZTOPRHKTHG6PBJPT6CU54Z, list_for_sale], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "buy_whole",
+      "contract": "artifex_whole_nft",
+      "fn": "buy_sale",
+      "contractId": "CA3ZQSJTIHROJCAEL7HOXJLE5ACBJ7CS4NZTOPRHKTHG6PBJPT6CU54Z",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CA3ZQSJTIHROJCAEL7HOXJLE5ACBJ7CS4NZTOPRHKTHG6PBJPT6CU54Z, buy_sale], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    },
+    {
+      "operation": "distribute",
+      "contract": "artifex_distribution",
+      "fn": "distribute",
+      "contractId": "CBGTYWZ2BZEJ7WMTIT77UUKXM2MYWZ5RYX4OKWAV47TT6FZVT4POHZFM",
+      "ok": false,
+      "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CBGTYWZ2BZEJ7WMTIT77UUKXM2MYWZ5RYX4OKWAV47TT6FZVT4POHZFM, distribute], data:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN\n"
+    }
+  ],
+  "blockers": [
+    {
+      "operation": "create",
+      "contract": "artifex_roles",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_fee_collector",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_connoisseur",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_cert_registry",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_whole_nft",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_participation",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_marketplace",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create",
+      "contract": "artifex_distribution",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_roles",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_fee_collector",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_connoisseur",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_cert_registry",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_whole_nft",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_participation",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_marketplace",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "init",
+      "contract": "artifex_distribution",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "propose_cert",
+      "contract": "artifex_cert_registry",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "create_offer",
+      "contract": "artifex_participation",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "buy_primary",
+      "contract": "artifex_participation",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "list_secondary",
+      "contract": "artifex_marketplace",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "list_whole",
+      "contract": "artifex_whole_nft",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "buy_whole",
+      "contract": "artifex_whole_nft",
+      "error": "HostError: Error(Storage, MissingValue)"
+    },
+    {
+      "operation": "distribute",
+      "contract": "artifex_distribution",
+      "error": "HostError: Error(Storage, MissingValue)"
+    }
+  ],
+  "totals": {
+    "uploadRawXlm": "87.9854151",
+    "uploadPlus30Xlm": "114.3810396",
+    "createInitInvoke": "BLOCKED — see blockers"
+  }
+}
