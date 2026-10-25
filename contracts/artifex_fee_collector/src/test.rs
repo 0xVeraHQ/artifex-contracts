@@ -111,7 +111,9 @@ fn deposit_xlm_refund_and_consume() {
     let id = env.register(Contract, ());
     let client = ContractClient::new(&env, &id);
     client.init(&platform, &usdc, &50_000_000, &10_000_000);
+    assert!(client.get_consumer().is_none());
     client.set_consumer(&platform, &consumer);
+    assert_eq!(client.get_consumer(), Some(consumer.clone()));
 
     let piece_a = BytesN::from_array(&env, &[1u8; 32]);
     let piece_b = BytesN::from_array(&env, &[2u8; 32]);

@@ -59,6 +59,11 @@ impl Contract {
         env.storage().instance().set(&DataKey::Consumer, &consumer);
     }
 
+    /// Read the address allowed to `consume_deposit` (normally the active cert_registry).
+    pub fn get_consumer(env: Env) -> Option<Address> {
+        env.storage().instance().get(&DataKey::Consumer)
+    }
+
     pub fn set_fee(env: Env, caller: Address, xlm_fee: i128, usdc_fee: i128) {
         caller.require_auth();
         Self::require_platform(&env, &caller);
