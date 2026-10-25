@@ -546,7 +546,11 @@
                       "symbol": "signed"
                     },
                     "val": {
-                      "vec": []
+                      "vec": [
+                        {
+                          "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
+                        }
+                      ]
                     }
                   }
                 ]

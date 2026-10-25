@@ -127,7 +127,7 @@
     ],
     [
       [
-        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARQG5",
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM",
         {
           "function": {
             "contract_fn": {
@@ -135,7 +135,7 @@
               "function_name": "propose_cert",
               "args": [
                 {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARQG5"
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
                 },
                 {
                   "bytes": "1111111111111111111111111111111111111111111111111111111111111111"
@@ -144,12 +144,15 @@
                   "bytes": "1212121212121212121212121212121212121212121212121212121212121212"
                 },
                 {
-                  "u32": 1
+                  "u32": 5
                 },
                 {
                   "vec": [
                     {
                       "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
+                    },
+                    {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                     }
                   ]
                 }
@@ -486,7 +489,7 @@
                       "symbol": "cert_type"
                     },
                     "val": {
-                      "u32": 1
+                      "u32": 5
                     }
                   },
                   {
@@ -526,7 +529,7 @@
                       "symbol": "proposer"
                     },
                     "val": {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARQG5"
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
                     }
                   },
                   {
@@ -537,6 +540,9 @@
                       "vec": [
                         {
                           "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
+                        },
+                        {
+                          "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                         }
                       ]
                     }
@@ -647,7 +653,7 @@
           "data": {
             "contract_data": {
               "ext": "v0",
-              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARQG5",
+              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM",
               "key": {
                 "ledger_key_nonce": {
                   "nonce": "4270020994084947596"

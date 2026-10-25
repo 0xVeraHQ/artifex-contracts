@@ -85,7 +85,22 @@ impl Contract {
         if required.len() != need {
             panic!("required signer count");
         }
-        let signed: Vec<Address> = Vec::new(&env);
+        // Living author: proposer's auth *is* the single artist signature.
+        // Auto-record it so the artist never has to co-sign themselves.
+        let mut signed: Vec<Address> = Vec::new(&env);
+        if cert_type == CERT_LIVING_AUTHOR {
+            let mut proposer_required = false;
+            for a in required.iter() {
+                if a == proposer {
+                    proposer_required = true;
+                    break;
+                }
+            }
+            if !proposer_required {
+                panic!("living author must propose as required signer");
+            }
+            signed.push_back(proposer.clone());
+        }
         let cert = Cert {
             piece_id: piece_id.clone(),
             claim_hash,
