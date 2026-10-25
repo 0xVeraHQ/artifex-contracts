@@ -73,13 +73,14 @@ fn living_author_flow() {
     let mut required = Vec::new(&env);
     required.push_back(artist.clone());
     client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
-    client.cosign(&artist, &piece);
+    // Propose counts as the sole living-author signature — no self cosign.
     client.mark_fee_paid(&platform, &piece);
     client.finalize_cert(&artist, &piece);
     assert!(client.is_finalized(&piece));
     let c = client.get_cert(&piece);
     assert_eq!(c.cert_type, CERT_LIVING_AUTHOR);
     assert_eq!(c.signed.len(), 1);
+    assert_eq!(c.signed.get(0).unwrap(), artist);
 }
 
 #[test]
@@ -119,7 +120,6 @@ fn finalize_without_fee_panics() {
     let mut required = Vec::new(&env);
     required.push_back(artist.clone());
     client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
-    client.cosign(&artist, &piece);
     client.finalize_cert(&artist, &piece);
 }
 
@@ -243,7 +243,6 @@ fn mark_fee_from_non_platform_fails() {
     let mut required = Vec::new(&env);
     required.push_back(artist.clone());
     client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
-    client.cosign(&artist, &piece);
     client.mark_fee_paid(&stranger, &piece);
 }
 
@@ -279,7 +278,6 @@ fn finalize_twice_rejected() {
     let mut required = Vec::new(&env);
     required.push_back(artist.clone());
     client.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
-    client.cosign(&artist, &piece);
     client.mark_fee_paid(&platform, &piece);
     client.finalize_cert(&artist, &piece);
     client.finalize_cert(&artist, &piece);
@@ -297,7 +295,6 @@ fn deposit_then_finalize_consumes_fee() {
     let mut required = Vec::new(&env);
     required.push_back(artist.clone());
     cert.propose_cert(&artist, &piece, &claim, &CERT_LIVING_AUTHOR, &required);
-    cert.cosign(&artist, &piece);
     fee.deposit_xlm(&artist, &xlm, &piece);
     assert!(fee.has_deposit(&piece));
     cert.finalize_cert(&artist, &piece);
