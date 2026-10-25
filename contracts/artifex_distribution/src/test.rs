@@ -1,12 +1,37 @@
 #![cfg(test)]
 
 use super::*;
-use artifex_participation::{Contract as Part, ContractClient as PartClient, TYPE_ECONOMIC};
+use artifex_participation::{
+    Contract as Part, ContractClient as PartClient, TYPE_ECONOMIC, TYPE_PATRONAGE,
+};
 use soroban_sdk::{
     testutils::Address as _,
     token::{StellarAssetClient, TokenClient},
-    Address, BytesN, Env, Vec,
+    vec, Address, BytesN, Env, Vec,
 };
+
+fn create_typed_offer(
+    env: &Env,
+    part: &PartClient<'_>,
+    seller: &Address,
+    usdc: &Address,
+    piece: &BytesN<32>,
+    terms: &BytesN<32>,
+    ptype: u32,
+) -> u64 {
+    let tokens = vec![env, usdc.clone()];
+    let prices = vec![env, 1i128];
+    part.create_offer(
+        seller,
+        piece,
+        &ptype,
+        &tokens,
+        &prices,
+        &100,
+        terms,
+        &true,
+    )
+}
 
 #[test]
 fn distribute_and_burn() {
@@ -25,15 +50,14 @@ fn distribute_and_burn() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[1u8; 32]);
     let terms = BytesN::from_array(&env, &[2u8; 32]);
-    let oid = part.create_offer(
+    let oid = create_typed_offer(
+        &env,
+        &part,
         &seller,
-        &piece,
-        &TYPE_ECONOMIC,
         &usdc,
-        &1,
-        &100,
+        &piece,
         &terms,
-        &true,
+        TYPE_ECONOMIC,
     );
     part.transfer_units(&seller, &holder, &oid, &30);
 
@@ -73,15 +97,14 @@ fn distribution_bps_mismatch_fails() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[3u8; 32]);
     let terms = BytesN::from_array(&env, &[4u8; 32]);
-    let oid = part.create_offer(
+    let oid = create_typed_offer(
+        &env,
+        &part,
         &seller,
-        &piece,
-        &TYPE_ECONOMIC,
         &usdc,
-        &1,
-        &100,
+        &piece,
         &terms,
-        &true,
+        TYPE_ECONOMIC,
     );
 
     let dist_id = env.register(Contract, ());
@@ -92,7 +115,7 @@ fn distribution_bps_mismatch_fails() {
     let mut recipients = Vec::new(&env);
     recipients.push_back(a);
     let mut shares = Vec::new(&env);
-    shares.push_back(5000u32); // not 10000
+    shares.push_back(5000u32);
     dist.distribute(&seller, &oid, &100_000_000, &recipients, &shares);
 }
 
@@ -113,15 +136,14 @@ fn distribution_len_mismatch_fails() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[5u8; 32]);
     let terms = BytesN::from_array(&env, &[6u8; 32]);
-    let oid = part.create_offer(
+    let oid = create_typed_offer(
+        &env,
+        &part,
         &seller,
-        &piece,
-        &TYPE_ECONOMIC,
         &usdc,
-        &1,
-        &100,
+        &piece,
         &terms,
-        &true,
+        TYPE_ECONOMIC,
     );
 
     let dist_id = env.register(Contract, ());
@@ -133,7 +155,7 @@ fn distribution_len_mismatch_fails() {
     recipients.push_back(a);
     recipients.push_back(b);
     let mut shares = Vec::new(&env);
-    shares.push_back(10000u32); // len 1 vs recipients 2
+    shares.push_back(10000u32);
     dist.distribute(&seller, &oid, &100_000_000, &recipients, &shares);
 }
 
@@ -169,15 +191,14 @@ fn burn_not_allowed_for_patronage() {
     part.init(&admin);
     let piece = BytesN::from_array(&env, &[8u8; 32]);
     let terms = BytesN::from_array(&env, &[9u8; 32]);
-    let oid = part.create_offer(
+    let oid = create_typed_offer(
+        &env,
+        &part,
         &seller,
-        &piece,
-        &TYPE_PATRONAGE,
         &usdc,
-        &1,
-        &100,
+        &piece,
         &terms,
-        &true,
+        TYPE_PATRONAGE,
     );
     part.transfer_units(&seller, &holder, &oid, &30);
 

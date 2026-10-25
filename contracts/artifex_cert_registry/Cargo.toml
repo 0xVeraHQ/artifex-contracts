@@ -14,3 +14,4 @@ soroban-sdk = { workspace = true }
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
 artifex_connoisseur = { path = "../artifex_connoisseur" }
+artifex_fee_collector = { path = "../artifex_fee_collector" }
