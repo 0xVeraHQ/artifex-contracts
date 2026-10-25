@@ -56,10 +56,27 @@ mkt="$(deploy_wasm artifex_marketplace)"
 dist="$(deploy_wasm artifex_distribution)"
 
 USDC_ISSUER="GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+# Canonical mainnet SAC IDs — abort if stellar CLI resolves anything else.
+EXPECTED_USDC_SAC="CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+EXPECTED_XLM_SAC="CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
 usdc_sac="$(stellar contract id asset --asset "USDC:$USDC_ISSUER" --network mainnet | tail -n1 | tr -d '\r')"
 xlm_sac="$(stellar contract id asset --asset native --network mainnet | tail -n1 | tr -d '\r')"
 echo "USDC SAC (mainnet): $usdc_sac"
 echo "XLM SAC (mainnet): $xlm_sac"
+
+assert_eq() {
+  local name="$1" got="$2" want="$3"
+  got="$(printf '%s' "$got" | tr -d '\r"[:space:]')"
+  want="$(printf '%s' "$want" | tr -d '\r"[:space:]')"
+  if [[ "$got" != "$want" ]]; then
+    echo "ERROR: $name mismatch: got=$got want=$want" >&2
+    exit 1
+  fi
+  echo "OK $name=$got"
+}
+
+assert_eq "usdc_sac" "$usdc_sac" "$EXPECTED_USDC_SAC"
+assert_eq "xlm_sac" "$xlm_sac" "$EXPECTED_XLM_SAC"
 
 # Mainnet symbolic fees (Joel): 0.5 XLM / 0.1 USDC (not Testnet 5 XLM / 1 USDC)
 stellar contract invoke --id "$roles" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" >/dev/null
@@ -72,6 +89,59 @@ stellar contract invoke --id "$nft" --source "$IDENTITY" --network mainnet -- in
 stellar contract invoke --id "$part" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" >/dev/null
 stellar contract invoke --id "$mkt" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" --participation "$part" >/dev/null
 stellar contract invoke --id "$dist" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" --participation "$part" >/dev/null
+
+# ---------------------------------------------------------------------------
+# Fail-closed post-deploy wiring verify (Testnet Auth InvalidAction class)
+# ---------------------------------------------------------------------------
+echo "=== Post-deploy wiring verify (abort on mismatch) ==="
+got_consumer="$(stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet --send=no -- get_consumer | tail -n1 | tr -d '\r')"
+if [[ -z "$got_consumer" || "$got_consumer" == "null" ]]; then
+  echo "ERROR: fee_collector Consumer unset after set_consumer" >&2
+  exit 1
+fi
+assert_eq "fee_collector.Consumer" "$got_consumer" "$cert"
+
+got_platform="$(stellar contract invoke --id "$roles" --source "$IDENTITY" --network mainnet --send=no -- platform | tail -n1 | tr -d '\r')"
+assert_eq "roles.platform" "$got_platform" "$ADDR"
+
+got_fees="$(stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet --send=no -- fees | tr -d '\r[:space:]')"
+if [[ "$got_fees" != '["5000000","1000000"]' ]]; then
+  echo "ERROR: fee_collector.fees mismatch: got=$got_fees want=[\"5000000\",\"1000000\"]" >&2
+  exit 1
+fi
+echo "OK fee_collector.fees=$got_fees"
+
+echo "=== finalize_cert simulation probe (catches wrong Consumer) ==="
+PROBE_PIECE="$(openssl rand -hex 32 2>/dev/null || python3 -c 'import os; print(os.urandom(32).hex())')"
+CLAIM_HASH="$(openssl rand -hex 32 2>/dev/null || python3 -c 'import os; print(os.urandom(32).hex())')"
+stellar contract invoke --id "$cert" --source "$IDENTITY" --network mainnet -- \
+  propose_cert \
+  --proposer "$ADDR" \
+  --piece_id "$PROBE_PIECE" \
+  --claim_hash "$CLAIM_HASH" \
+  --cert_type 1 \
+  --required "[ \"$ADDR\" ]" >/dev/null
+stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- \
+  deposit_xlm --payer "$ADDR" --xlm "$xlm_sac" --piece_id "$PROBE_PIECE" >/dev/null
+
+set +e
+fin_out="$(stellar contract invoke --id "$cert" --source "$IDENTITY" --network mainnet --send=no -- \
+  finalize_cert --caller "$ADDR" --piece_id "$PROBE_PIECE" 2>&1)"
+fin_rc=$?
+set -e
+if [[ $fin_rc -ne 0 ]] || printf '%s' "$fin_out" | grep -qiE 'InvalidAction|Auth'; then
+  echo "ERROR: finalize_cert simulation failed (rc=$fin_rc) — likely wrong Consumer (Auth InvalidAction class)" >&2
+  printf '%s\n' "$fin_out" >&2
+  stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- \
+    refund_deposit --caller "$ADDR" --piece_id "$PROBE_PIECE" --xlm "$xlm_sac" >/dev/null 2>&1 || true
+  exit 1
+fi
+echo "OK finalize_cert simulation"
+
+stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- \
+  refund_deposit --caller "$ADDR" --piece_id "$PROBE_PIECE" --xlm "$xlm_sac" >/dev/null
+echo "OK probe deposit refunded (finalize not submitted)"
+echo "=== wiring verify passed ==="
 
 python3 - <<PY
 import json, datetime
@@ -93,6 +163,8 @@ out = {
     "artifex_distribution": "$dist",
   },
   "wholeNftSaleV3": {"list_for_sale": True, "buy_sale": True, "cancel_sale": True},
+  "wiringVerified": True,
+  "feeCollectorConsumer": "$cert",
 }
 path = "$OUT_DIR/mainnet.json"
 with open(path, "w", encoding="utf-8") as f:
