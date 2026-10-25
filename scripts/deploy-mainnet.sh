@@ -66,6 +66,8 @@ stellar contract invoke --id "$roles" --source "$IDENTITY" --network mainnet -- 
 stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" --usdc "$usdc_sac" --xlm_fee 5000000 --usdc_fee 1000000 >/dev/null
 stellar contract invoke --id "$cnn" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" >/dev/null
 stellar contract invoke --id "$cert" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" --validator "$ADDR" --fee_collector "$fee" --connoisseur "$cnn" >/dev/null
+# Required: fee_collector.consume_deposit only accepts this consumer. Skipping leaves finalize broken.
+stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- set_consumer --caller "$ADDR" --consumer "$cert" >/dev/null
 stellar contract invoke --id "$nft" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" >/dev/null
 stellar contract invoke --id "$part" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" >/dev/null
 stellar contract invoke --id "$mkt" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" --participation "$part" >/dev/null
