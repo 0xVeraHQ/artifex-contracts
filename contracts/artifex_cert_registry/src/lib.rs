@@ -141,7 +141,8 @@ impl Contract {
             .publish((symbol_short!("cert_sign"), signer), piece_id);
     }
 
-    /// Mark fee paid (API/fee_collector integration calls this after collect_* succeeds).
+    /// Mark fee paid (API/fee_collector integration). Only when signatures are ready —
+    /// prevents collecting fee credit before finalize can succeed.
     pub fn mark_fee_paid(env: Env, caller: Address, piece_id: BytesN<32>) {
         caller.require_auth();
         let platform: Address = env.storage().instance().get(&DataKey::Platform).unwrap();
@@ -154,6 +155,10 @@ impl Contract {
             .persistent()
             .get(&DataKey::Cert(piece_id.clone()))
             .expect("no cert");
+        if cert.finalized {
+            panic!("already finalized");
+        }
+        Self::assert_ready_to_finalize(&env, &cert);
         cert.fee_paid = true;
         env.storage()
             .persistent()
@@ -162,6 +167,10 @@ impl Contract {
             .publish((symbol_short!("fee_paid"), piece_id), true);
     }
 
+    /// Finalize only after signatures are ready. Fee must already be marked paid, or a
+    /// piece-scoped deposit on fee_collector is consumed in this same call (atomic with
+    /// finalize). Signature checks run *before* consume so a failed finalize leaves the
+    /// deposit refundable.
     pub fn finalize_cert(env: Env, caller: Address, piece_id: BytesN<32>) {
         caller.require_auth();
         let mut cert: Cert = env
@@ -172,37 +181,19 @@ impl Contract {
         if cert.finalized {
             panic!("already finalized");
         }
+        // Preconditions first — never consume fee if finalize cannot succeed.
+        Self::assert_ready_to_finalize(&env, &cert);
+
         if !cert.fee_paid {
-            panic!("fee required");
+            let fee_addr: Address = env.storage().instance().get(&DataKey::FeeCollector).unwrap();
+            let fee = FeeCollectorClient::new(&env, &fee_addr);
+            if !fee.has_deposit(&piece_id) {
+                panic!("fee required");
+            }
+            fee.consume_deposit(&piece_id);
+            cert.fee_paid = true;
         }
-        // All required signers present (validator may substitute for prior-digitization).
-        for req in cert.required.iter() {
-            let mut ok = false;
-            for s in cert.signed.iter() {
-                if s == req {
-                    ok = true;
-                    break;
-                }
-            }
-            if !ok {
-                panic!("missing signature");
-            }
-        }
-        // Deceased-connoisseur path: at least one required signer must have authorized the piece.
-        if cert.cert_type == CERT_DECEASED_CONNOISSEUR {
-            let cnn_addr: Address = env.storage().instance().get(&DataKey::Connoisseur).unwrap();
-            let cnn = ConnoisseurClient::new(&env, &cnn_addr);
-            let mut auth_ok = false;
-            for req in cert.required.iter() {
-                if cnn.is_authorized(&req, &piece_id) {
-                    auth_ok = true;
-                    break;
-                }
-            }
-            if !auth_ok {
-                panic!("connoisseur not authorized");
-            }
-        }
+
         cert.finalized = true;
         env.storage()
             .persistent()
@@ -225,6 +216,67 @@ impl Contract {
             .map(|c: Cert| c.finalized)
             .unwrap_or(false)
     }
+
+    /// True when all required signatures (and cnn auth if applicable) are present.
+    pub fn is_ready(env: Env, piece_id: BytesN<32>) -> bool {
+        let cert: Cert = match env.storage().persistent().get(&DataKey::Cert(piece_id)) {
+            Some(c) => c,
+            None => return false,
+        };
+        if cert.finalized {
+            return false;
+        }
+        Self::check_ready(&env, &cert).is_ok()
+    }
+
+    fn assert_ready_to_finalize(env: &Env, cert: &Cert) {
+        if let Err(msg) = Self::check_ready(env, cert) {
+            panic!("{}", msg);
+        }
+    }
+
+    fn check_ready(env: &Env, cert: &Cert) -> Result<(), &'static str> {
+        let validator: Address = env.storage().instance().get(&DataKey::Validator).unwrap();
+        let allow_validator_sub = cert.cert_type == CERT_PRIOR_DIGITIZATION;
+
+        for req in cert.required.iter() {
+            let mut ok = false;
+            for s in cert.signed.iter() {
+                if s == req {
+                    ok = true;
+                    break;
+                }
+            }
+            // Prior digitization: validator signature may stand in for a missing required signer.
+            if !ok && allow_validator_sub {
+                for s in cert.signed.iter() {
+                    if s == validator {
+                        ok = true;
+                        break;
+                    }
+                }
+            }
+            if !ok {
+                return Err("missing signature");
+            }
+        }
+
+        if cert.cert_type == CERT_DECEASED_CONNOISSEUR {
+            let cnn_addr: Address = env.storage().instance().get(&DataKey::Connoisseur).unwrap();
+            let cnn = ConnoisseurClient::new(env, &cnn_addr);
+            let mut auth_ok = false;
+            for req in cert.required.iter() {
+                if cnn.is_authorized(&req, &cert.piece_id) {
+                    auth_ok = true;
+                    break;
+                }
+            }
+            if !auth_ok {
+                return Err("connoisseur not authorized");
+            }
+        }
+        Ok(())
+    }
 }
 
 mod connoisseur_client {
@@ -237,5 +289,17 @@ mod connoisseur_client {
     }
 }
 use connoisseur_client::*;
+
+mod fee_collector_client {
+    use super::*;
+    use soroban_sdk::contractclient;
+
+    #[contractclient(name = "FeeCollectorClient")]
+    pub trait FeeCollectorTrait {
+        fn has_deposit(env: Env, piece_id: BytesN<32>) -> bool;
+        fn consume_deposit(env: Env, piece_id: BytesN<32>);
+    }
+}
+use fee_collector_client::*;
 
 mod test;
