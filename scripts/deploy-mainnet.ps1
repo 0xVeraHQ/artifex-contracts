@@ -59,6 +59,8 @@ $dist = Deploy-Wasm "artifex_distribution"
 
 # Circle Mainnet USDC issuer (public) — NOT testnet GBBD…
 $usdcIssuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+$expectedUsdcSac = "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+$expectedXlmSac = "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
 $usdcSac = stellar contract id asset --asset "USDC:$usdcIssuer" --network mainnet
 $usdcSac = ($usdcSac | Select-Object -Last 1).ToString().Trim()
 Write-Host "USDC SAC (mainnet): $usdcSac"
@@ -66,6 +68,16 @@ Write-Host "USDC SAC (mainnet): $usdcSac"
 $xlmSac = stellar contract id asset --asset native --network mainnet
 $xlmSac = ($xlmSac | Select-Object -Last 1).ToString().Trim()
 Write-Host "XLM SAC (mainnet): $xlmSac"
+
+function Assert-Eq([string]$Name, [string]$Got, [string]$Want) {
+  $g = ($Got -replace '[\r\n"\s]', '')
+  $w = ($Want -replace '[\r\n"\s]', '')
+  if ($g -ne $w) { throw "ERROR: $Name mismatch: got=$g want=$w" }
+  Write-Host "OK $Name=$g"
+}
+
+Assert-Eq "usdc_sac" $usdcSac $expectedUsdcSac
+Assert-Eq "xlm_sac" $xlmSac $expectedXlmSac
 
 # Init — mainnet symbolic fees (Joel): 0.5 XLM / 0.1 USDC (not Testnet 5 XLM / 1 USDC)
 stellar contract invoke --id $roles --source $identity --network mainnet -- init --platform $addr | Out-Null
@@ -78,6 +90,64 @@ stellar contract invoke --id $nft --source $identity --network mainnet -- init -
 stellar contract invoke --id $part --source $identity --network mainnet -- init --admin $addr | Out-Null
 stellar contract invoke --id $mkt --source $identity --network mainnet -- init --admin $addr --participation $part | Out-Null
 stellar contract invoke --id $dist --source $identity --network mainnet -- init --admin $addr --participation $part | Out-Null
+
+# Fail-closed post-deploy wiring verify (Testnet Auth InvalidAction class)
+Write-Host "=== Post-deploy wiring verify (abort on mismatch) ==="
+$gotConsumer = stellar contract invoke --id $fee --source $identity --network mainnet --send=no -- get_consumer
+$gotConsumer = ($gotConsumer | Select-Object -Last 1).ToString().Trim()
+if ([string]::IsNullOrWhiteSpace($gotConsumer) -or $gotConsumer -eq "null") {
+  throw "ERROR: fee_collector Consumer unset after set_consumer"
+}
+Assert-Eq "fee_collector.Consumer" $gotConsumer $cert
+
+$gotPlatform = stellar contract invoke --id $roles --source $identity --network mainnet --send=no -- platform
+$gotPlatform = ($gotPlatform | Select-Object -Last 1).ToString().Trim()
+Assert-Eq "roles.platform" $gotPlatform $addr
+
+$gotFees = (stellar contract invoke --id $fee --source $identity --network mainnet --send=no -- fees | Out-String).Trim() -replace '\s', ''
+if ($gotFees -ne '["5000000","1000000"]') {
+  throw "ERROR: fee_collector.fees mismatch: got=$gotFees want=[`"5000000`",`"1000000`"]"
+}
+Write-Host "OK fee_collector.fees=$gotFees"
+
+Write-Host "=== finalize_cert simulation probe (catches wrong Consumer) ==="
+$bytes = New-Object byte[] 32
+[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+$probePiece = -join ($bytes | ForEach-Object { $_.ToString("x2") })
+[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+$claimHash = -join ($bytes | ForEach-Object { $_.ToString("x2") })
+stellar contract invoke --id $cert --source $identity --network mainnet -- `
+  propose_cert `
+  --proposer $addr `
+  --piece_id $probePiece `
+  --claim_hash $claimHash `
+  --cert_type 1 `
+  --required "[ `"$addr`" ]" | Out-Null
+stellar contract invoke --id $fee --source $identity --network mainnet -- `
+  deposit_xlm --payer $addr --xlm $xlmSac --piece_id $probePiece | Out-Null
+
+$finOk = $true
+$finOut = ""
+try {
+  $finOut = stellar contract invoke --id $cert --source $identity --network mainnet --send=no -- `
+    finalize_cert --caller $addr --piece_id $probePiece 2>&1 | Out-String
+} catch {
+  $finOk = $false
+  $finOut = $_.Exception.Message
+}
+if (-not $finOk -or $finOut -match 'InvalidAction|Auth') {
+  try {
+    stellar contract invoke --id $fee --source $identity --network mainnet -- `
+      refund_deposit --caller $addr --piece_id $probePiece --xlm $xlmSac | Out-Null
+  } catch {}
+  throw "ERROR: finalize_cert simulation failed — likely wrong Consumer (Auth InvalidAction class): $finOut"
+}
+Write-Host "OK finalize_cert simulation"
+
+stellar contract invoke --id $fee --source $identity --network mainnet -- `
+  refund_deposit --caller $addr --piece_id $probePiece --xlm $xlmSac | Out-Null
+Write-Host "OK probe deposit refunded (finalize not submitted)"
+Write-Host "=== wiring verify passed ==="
 
 $result = [ordered]@{
   network           = "mainnet"
@@ -101,6 +171,8 @@ $result = [ordered]@{
     buy_sale      = $true
     cancel_sale   = $true
   }
+  wiringVerified        = $true
+  feeCollectorConsumer  = $cert
 }
 $jsonPath = Join-Path $outDir "mainnet.json"
 $result | ConvertTo-Json -Depth 5 | Set-Content -Path $jsonPath -Encoding utf8
