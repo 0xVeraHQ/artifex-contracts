@@ -5,7 +5,7 @@ use artifex_participation::{Contract as Part, ContractClient as PartClient, TYPE
 use soroban_sdk::{
     testutils::Address as _,
     token::{StellarAssetClient, TokenClient},
-    Address, BytesN, Env,
+    vec, Address, BytesN, Env,
 };
 
 fn mkt_setup(
@@ -34,6 +34,28 @@ fn mkt_setup(
     (admin, seller, buyer, usdc, mkt_id, part, mkt)
 }
 
+fn usdc_offer(
+    env: &Env,
+    part: &PartClient<'_>,
+    seller: &Address,
+    usdc: &Address,
+    piece: &BytesN<32>,
+    terms: &BytesN<32>,
+) -> u64 {
+    let tokens = vec![env, usdc.clone()];
+    let prices = vec![env, 1_000_000i128];
+    part.create_offer(
+        seller,
+        piece,
+        &TYPE_ECONOMIC,
+        &tokens,
+        &prices,
+        &50,
+        terms,
+        &false,
+    )
+}
+
 #[test]
 fn list_and_partial_buy() {
     let env = Env::default();
@@ -41,16 +63,7 @@ fn list_and_partial_buy() {
     let (_admin, seller, buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[8u8; 32]);
     let terms = BytesN::from_array(&env, &[9u8; 32]);
-    let oid = part.create_offer(
-        &seller,
-        &piece,
-        &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
-        &50,
-        &terms,
-        &false,
-    );
+    let oid = usdc_offer(&env, &part, &seller, &usdc, &piece, &terms);
     part.transfer_units(&seller, &mkt_id, &oid, &20);
     let lid = mkt.list(&seller, &oid, &usdc, &2_000_000, &20);
     mkt.buy_partial(&buyer, &lid, &5);
@@ -69,16 +82,7 @@ fn buy_more_than_listing_available_fails() {
     let (_admin, seller, buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[1u8; 32]);
     let terms = BytesN::from_array(&env, &[2u8; 32]);
-    let oid = part.create_offer(
-        &seller,
-        &piece,
-        &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
-        &50,
-        &terms,
-        &false,
-    );
+    let oid = usdc_offer(&env, &part, &seller, &usdc, &piece, &terms);
     part.transfer_units(&seller, &mkt_id, &oid, &5);
     let lid = mkt.list(&seller, &oid, &usdc, &2_000_000, &5);
     mkt.buy_partial(&buyer, &lid, &6);
@@ -92,16 +96,7 @@ fn buy_cancelled_listing_fails() {
     let (_admin, seller, buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[3u8; 32]);
     let terms = BytesN::from_array(&env, &[4u8; 32]);
-    let oid = part.create_offer(
-        &seller,
-        &piece,
-        &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
-        &50,
-        &terms,
-        &false,
-    );
+    let oid = usdc_offer(&env, &part, &seller, &usdc, &piece, &terms);
     part.transfer_units(&seller, &mkt_id, &oid, &10);
     let lid = mkt.list(&seller, &oid, &usdc, &2_000_000, &10);
     mkt.cancel_listing(&seller, &lid);
@@ -117,7 +112,6 @@ fn buy_wrong_asset_insufficient_fails() {
     let seller = Address::generate(&env);
     let buyer = Address::generate(&env);
     let usdc = env.register_stellar_asset_contract_v2(admin.clone()).address();
-    // buyer has no USDC — wrong/insufficient asset
     let part_id = env.register(Part, ());
     let part = PartClient::new(&env, &part_id);
     part.init(&admin);
@@ -126,16 +120,7 @@ fn buy_wrong_asset_insufficient_fails() {
     mkt.init(&admin, &part_id);
     let piece = BytesN::from_array(&env, &[5u8; 32]);
     let terms = BytesN::from_array(&env, &[6u8; 32]);
-    let oid = part.create_offer(
-        &seller,
-        &piece,
-        &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
-        &50,
-        &terms,
-        &false,
-    );
+    let oid = usdc_offer(&env, &part, &seller, &usdc, &piece, &terms);
     part.transfer_units(&seller, &mkt_id, &oid, &10);
     let lid = mkt.list(&seller, &oid, &usdc, &2_000_000, &10);
     mkt.buy_partial(&buyer, &lid, &1);
@@ -148,16 +133,7 @@ fn cancel_listing_returns_units() {
     let (_admin, seller, _buyer, usdc, mkt_id, part, mkt) = mkt_setup(&env);
     let piece = BytesN::from_array(&env, &[7u8; 32]);
     let terms = BytesN::from_array(&env, &[8u8; 32]);
-    let oid = part.create_offer(
-        &seller,
-        &piece,
-        &TYPE_ECONOMIC,
-        &usdc,
-        &1_000_000,
-        &50,
-        &terms,
-        &false,
-    );
+    let oid = usdc_offer(&env, &part, &seller, &usdc, &piece, &terms);
     part.transfer_units(&seller, &mkt_id, &oid, &10);
     let lid = mkt.list(&seller, &oid, &usdc, &2_000_000, &10);
     mkt.cancel_listing(&seller, &lid);

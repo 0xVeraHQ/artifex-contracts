@@ -86,19 +86,27 @@
                   "u32": 2
                 },
                 {
-                  "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                  "vec": [
+                    {
+                      "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                    }
+                  ]
                 },
                 {
-                  "i128": "500000"
+                  "vec": [
+                    {
+                      "i128": "1000000"
+                    }
+                  ]
                 },
                 {
-                  "i128": "20"
+                  "i128": "10"
                 },
                 {
                   "bytes": "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"
                 },
                 {
-                  "bool": false
+                  "bool": true
                 }
               ]
             }
@@ -284,7 +292,7 @@
               },
               "durability": "persistent",
               "val": {
-                "i128": "20"
+                "i128": "10"
               }
             }
           },
@@ -325,7 +333,7 @@
                       "symbol": "certified"
                     },
                     "val": {
-                      "bool": false
+                      "bool": true
                     }
                   },
                   {
@@ -346,10 +354,14 @@
                   },
                   {
                     "key": {
-                      "symbol": "payment_token"
+                      "symbol": "payment_tokens"
                     },
                     "val": {
-                      "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                      "vec": [
+                        {
+                          "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                        }
+                      ]
                     }
                   },
                   {
@@ -365,7 +377,7 @@
                       "symbol": "remaining"
                     },
                     "val": {
-                      "i128": "20"
+                      "i128": "10"
                     }
                   },
                   {
@@ -389,15 +401,19 @@
                       "symbol": "total_units"
                     },
                     "val": {
-                      "i128": "20"
+                      "i128": "10"
                     }
                   },
                   {
                     "key": {
-                      "symbol": "unit_price"
+                      "symbol": "unit_prices"
                     },
                     "val": {
-                      "i128": "500000"
+                      "vec": [
+                        {
+                          "i128": "1000000"
+                        }
+                      ]
                     }
                   }
                 ]

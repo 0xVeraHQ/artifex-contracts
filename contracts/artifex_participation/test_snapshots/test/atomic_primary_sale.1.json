@@ -86,10 +86,18 @@
                   "u32": 1
                 },
                 {
-                  "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                  "vec": [
+                    {
+                      "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                    }
+                  ]
                 },
                 {
-                  "i128": "1000000"
+                  "vec": [
+                    {
+                      "i128": "1000000"
+                    }
+                  ]
                 },
                 {
                   "i128": "100"
@@ -124,6 +132,9 @@
                 },
                 {
                   "i128": "40"
+                },
+                {
+                  "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
                 }
               ]
             }
@@ -403,10 +414,14 @@
                   },
                   {
                     "key": {
-                      "symbol": "payment_token"
+                      "symbol": "payment_tokens"
                     },
                     "val": {
-                      "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                      "vec": [
+                        {
+                          "address": "CCABDO7UZXYE4W6GVSEGSNNZTKSLFQGKXXQTH6OX7M7GKZ4Z6CUJNGZN"
+                        }
+                      ]
                     }
                   },
                   {
@@ -451,10 +466,14 @@
                   },
                   {
                     "key": {
-                      "symbol": "unit_price"
+                      "symbol": "unit_prices"
                     },
                     "val": {
-                      "i128": "1000000"
+                      "vec": [
+                        {
+                          "i128": "1000000"
+                        }
+                      ]
                     }
                   }
                 ]
