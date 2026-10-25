@@ -63,9 +63,9 @@ $xlmSac = stellar contract id asset --asset native --network mainnet
 $xlmSac = ($xlmSac | Select-Object -Last 1).ToString().Trim()
 Write-Host "XLM SAC (mainnet): $xlmSac"
 
-# Init (5 XLM = 50000000 stroops, 1 USDC = 10000000 with 7 decimals)
+# Init — mainnet symbolic fees (Joel): 0.5 XLM / 0.1 USDC (not Testnet 5 XLM / 1 USDC)
 stellar contract invoke --id $roles --source $identity --network mainnet -- init --platform $addr | Out-Null
-stellar contract invoke --id $fee --source $identity --network mainnet -- init --platform $addr --usdc $usdcSac --xlm_fee 50000000 --usdc_fee 10000000 | Out-Null
+stellar contract invoke --id $fee --source $identity --network mainnet -- init --platform $addr --usdc $usdcSac --xlm_fee 5000000 --usdc_fee 1000000 | Out-Null
 stellar contract invoke --id $cnn --source $identity --network mainnet -- init --platform $addr | Out-Null
 stellar contract invoke --id $cert --source $identity --network mainnet -- init --platform $addr --validator $addr --fee_collector $fee --connoisseur $cnn | Out-Null
 stellar contract invoke --id $nft --source $identity --network mainnet -- init --admin $addr | Out-Null

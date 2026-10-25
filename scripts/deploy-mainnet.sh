@@ -56,8 +56,9 @@ xlm_sac="$(stellar contract id asset --asset native --network mainnet | tail -n1
 echo "USDC SAC (mainnet): $usdc_sac"
 echo "XLM SAC (mainnet): $xlm_sac"
 
+# Mainnet symbolic fees (Joel): 0.5 XLM / 0.1 USDC (not Testnet 5 XLM / 1 USDC)
 stellar contract invoke --id "$roles" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" >/dev/null
-stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" --usdc "$usdc_sac" --xlm_fee 50000000 --usdc_fee 10000000 >/dev/null
+stellar contract invoke --id "$fee" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" --usdc "$usdc_sac" --xlm_fee 5000000 --usdc_fee 1000000 >/dev/null
 stellar contract invoke --id "$cnn" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" >/dev/null
 stellar contract invoke --id "$cert" --source "$IDENTITY" --network mainnet -- init --platform "$ADDR" --validator "$ADDR" --fee_collector "$fee" --connoisseur "$cnn" >/dev/null
 stellar contract invoke --id "$nft" --source "$IDENTITY" --network mainnet -- init --admin "$ADDR" >/dev/null
