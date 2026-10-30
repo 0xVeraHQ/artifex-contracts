@@ -1,4 +1,5 @@
 [package]
+# legacy crate name: artifex_* — Artshio product; do not redeploy for brand
 name = "artifex_cert_registry"
 version.workspace = true
 edition = "2021"

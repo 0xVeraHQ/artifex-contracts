@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy Artifex Soroban contracts to Stellar MAINNET.
+# Deploy Artshio Soroban contracts to Stellar MAINNET.
+# Crate dirs remain artifex_* (legacy; do not redeploy for brand).
 # HARD STOP: refuses unless ARTIFEX_CONFIRM_MAINNET=JOEL_CONFIRMED.
 # Does NOT Friendbot-fund. See deploy-mainnet.ps1 for the Windows twin.
 #

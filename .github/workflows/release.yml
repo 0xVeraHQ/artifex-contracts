@@ -1,8 +1,11 @@
 name: release
 
+# Repo: Artshio/artshio-contracts (product Artshio).
+# Keep in sync with VERSION (SemVer body without leading v).
 # Contracts release rule: SemVer tag on main only. No Docker image.
 #   vX.Y.Z or vX.Y.Z-rc.N — validates tag + runs cargo test.
 # Deploy workflows may create these tags after Testnet deploy; never hackathon/soroban/classic names.
+# Crate package dirs stay artifex_* (legacy on-chain names) — do not redeploy for brand.
 on:
   push:
     tags:
