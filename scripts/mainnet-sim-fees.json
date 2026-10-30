@@ -13,7 +13,7 @@
       "ledgerRetentionWindow": 120960
     },
     "feeField": "minResourceFee (stroops) from rpc.Server.simulateTransaction; reported XLM = (minResourceFee + inclusion 100 stroops) / 1e7. Nothing submitted/broadcast.",
-    "wasmDir": "D:/Git/orgs/0xVeraHQ/projects/artifex/artifex-contracts/target/wasm32v1-none/release"
+    "wasmDir": "D:/Git/orgs/0xVeraHQ/projects/artifex/artshio-contracts/target/wasm32v1-none/release"
   },
   "rows": [
     {

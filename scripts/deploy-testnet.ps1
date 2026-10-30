@@ -1,4 +1,5 @@
-# Deploy Artifex Soroban contracts to Testnet. No secrets logged or committed.
+# Deploy Artshio Soroban contracts to Testnet. No secrets logged or committed.
+# Crate dirs remain artifex_* (legacy; do not redeploy for brand).
 # Requires: stellar CLI on PATH, network testnet, and either:
 #   STELLAR_DEPLOYER_SECRET  (S...)  OR an existing `stellar keys` identity named artifex-deployer
 # Funds via Friendbot when balance is zero.

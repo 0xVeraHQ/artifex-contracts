@@ -13,10 +13,10 @@ const PASS = Networks.PUBLIC;
 const SRC = process.env.SOURCE_G || "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 const WASM_DIR =
   process.env.WASM_DIR ||
-  "D:/Git/orgs/0xVeraHQ/projects/artifex/artifex-contracts/target/wasm32v1-none/release";
+  "D:/Git/orgs/0xVeraHQ/projects/artifex/artshio-contracts/target/wasm32v1-none/release";
 const OUT =
   process.env.OUT ||
-  "D:/Git/orgs/0xVeraHQ/projects/artifex/artifex-contracts-wt-mainnet-d576/scripts/mainnet-sim-fees.json";
+  "D:/Git/orgs/0xVeraHQ/projects/artifex/artshio-contracts-wt-mainnet-d576/scripts/mainnet-sim-fees.json";
 
 const CONTRACTS = [
   "artifex_roles",
@@ -72,7 +72,7 @@ async function main() {
   const rows = [];
   const blockers = [];
 
-  // --- Uploads (real Artifex WASM) ---
+  // --- Uploads (real Artshio WASM (crates still artifex_*)) ---
   for (let i = 0; i < CONTRACTS.length; i++) {
     const name = CONTRACTS[i];
     const wasmPath = path.join(WASM_DIR, `${name}.wasm`);
@@ -96,7 +96,7 @@ async function main() {
     );
   }
 
-  // --- Create/instance against Artifex wasm hash (expected fail if not on ledger) ---
+  // --- Create/instance against Artshio wasm hash (artifex_* crates) (expected fail if not on ledger) ---
   for (let i = 0; i < CONTRACTS.length; i++) {
     const name = CONTRACTS[i];
     const wasmPath = path.join(WASM_DIR, `${name}.wasm`);
